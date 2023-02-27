@@ -16,14 +16,23 @@ public class PlayerController : MonoBehaviour
     public float jumpForce; // La potencia del salto
     public bool jumpInputOn; //He presionado el botón de salto
 
-    public Vector2 inputValue; //Es para ver el input que estamos haciendo cuando presionamos los botones
-                               //Registrados en Input.GetAxis o Input.GetAxisRaw
+    [Header("Ground  Check Properties")]
+    public Transform groundCheckPoint; //Punto para reconocer donde están los pies y ver el suelo.
+    public float radius; //radio para extender el rango del punto, y poder reconocer el suelo.
+    public LayerMask whatisGround; //Sirve para reconocer, ¿qué es tierra?
+    public bool isGrounded; //Se vuelve true, en caso se haya tocado el suelo, caso contrario, se vuelve false, puesto que estás en el aire.
+
+    [Header("Double Jump Properties")]
+    public bool doubleJump=true;
+
+    Vector2 inputValue; //Es para ver el input que estamos haciendo cuando presionamos los botones
+                        //Registrados en Input.GetAxis o Input.GetAxisRaw
 
     void Start()
     {
         //Enlazar la variable rigidBody con el componente de mi player, RigidBody2D
         rigidBody = GetComponent<Rigidbody2D>();
-
+        doubleJump = true;
         direction = -1;
         FlipSprite();
     }
@@ -41,6 +50,8 @@ public class PlayerController : MonoBehaviour
     {
         //Mover a mi player según el input registrado en la función MovementInput
         Movement_Action();
+
+        GroundCheck();
 
         //Si la variable jumpInputOn está activa (es true), entonces has el salto, y apaga la variable.
         if (jumpInputOn)
@@ -107,10 +118,26 @@ public class PlayerController : MonoBehaviour
 
     #region Jump
 
+    void GroundCheck()
+    {
+        isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, radius, whatisGround);
+
+        if(isGrounded)
+        {
+            doubleJump = true;
+        }
+    }
+
     void Jump()
     {
         //Aquí se le da una fuerza en el eje y o en el eje vertical.
-        rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpForce);
+        if(isGrounded)
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpForce);
+        else if(doubleJump)
+        {
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpForce);
+            doubleJump = false;
+        }
     }
 
     #endregion
