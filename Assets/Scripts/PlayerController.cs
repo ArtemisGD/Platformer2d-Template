@@ -127,10 +127,23 @@ public class PlayerController : MonoBehaviour
     void GroundCheck()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, radius, whatisGround);
-        animator.SetBool("isNotInGround", !isGrounded);
+
         if (isGrounded)
         {
+            animator.SetInteger("Jump", 0);
+            if(!doubleJump)
             doubleJump = true;
+        }
+        else if(!isGrounded)
+        {
+            if(doubleJump)
+            {
+                animator.SetInteger("Jump", 1);
+            }
+            else
+            {
+                animator.SetInteger("Jump", 2);
+            }
         }
     }
 
@@ -144,7 +157,6 @@ public class PlayerController : MonoBehaviour
         else if (doubleJump)
         {
             rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpForce);
-            animator.SetBool("isNotInGround", true);
             doubleJump = false;
         }
     }
