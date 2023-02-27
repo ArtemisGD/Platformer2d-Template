@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
     public Rigidbody2D rigidBody; //Es la variable que luego de enlazarse con el componente
@@ -25,6 +26,9 @@ public class PlayerController : MonoBehaviour
     [Header("Double Jump Properties")]
     public bool doubleJump=true;
 
+    [Header("Animations")]
+    public Animator animator;
+
     Vector2 inputValue; //Es para ver el input que estamos haciendo cuando presionamos los botones
                         //Registrados en Input.GetAxis o Input.GetAxisRaw
 
@@ -32,6 +36,7 @@ public class PlayerController : MonoBehaviour
     {
         //Enlazar la variable rigidBody con el componente de mi player, RigidBody2D
         rigidBody = GetComponent<Rigidbody2D>();
+        animator = GetComponent <Animator>();
         doubleJump = true;
         direction = -1;
         FlipSprite();
@@ -106,6 +111,7 @@ public class PlayerController : MonoBehaviour
         }
         // else
         //   direction = 0;
+        animator.SetBool("isMoving", inputValue.x != 0 ? true : false);
     }
 
     void Movement_Action()
@@ -121,8 +127,8 @@ public class PlayerController : MonoBehaviour
     void GroundCheck()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, radius, whatisGround);
-
-        if(isGrounded)
+        animator.SetBool("isNotInGround", !isGrounded);
+        if (isGrounded)
         {
             doubleJump = true;
         }
@@ -131,11 +137,14 @@ public class PlayerController : MonoBehaviour
     void Jump()
     {
         //Aquí se le da una fuerza en el eje y o en el eje vertical.
-        if(isGrounded)
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpForce);
-        else if(doubleJump)
+        if (isGrounded)
         {
             rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpForce);
+        }
+        else if (doubleJump)
+        {
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, jumpForce);
+            animator.SetBool("isNotInGround", true);
             doubleJump = false;
         }
     }
